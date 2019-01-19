@@ -42,7 +42,7 @@ namespace todoApi.Tests
             });
 
             itemlist = context.TodoItems.ToList();
-            controller = new TodoController(new TodoContext(options));
+            controller = new TodoController(context);
 
         }
 
@@ -80,15 +80,18 @@ namespace todoApi.Tests
         public async Task OkPutTodoItemTest()
         {
             var targetId = context.TodoItems.ToList()[0].Id;
-            var item = new TodoItem { Id = targetId, Name = "updateditem", IsComplete = false };
-            _output.WriteLine("target: {0}, update item:{1} {2} {3}", targetId, item.Id, item.Name, item.IsComplete);
+            var item = context.TodoItems.ToList()[0];
+            item.Name = "updated";
+            item.IsComplete = true;
             var result = await controller.PutTodoItem(targetId, item);
+
+            _output.WriteLine("{0}", result.Value.Name);
 
             await PrintData();
 
-            Assert.IsType<NoContentResult>(result);
-            Assert.Equal(item.Name, context.TodoItems.Where(x => x.Id == targetId).FirstOrDefault().Name);
-            Assert.Equal(item.IsComplete, context.TodoItems.Where(x => x.Id == targetId).FirstOrDefault().IsComplete);
+            Assert.IsType<ActionResult<TodoItem>>(result);
+            Assert.Equal(item.Name, (await context.TodoItems.Where(x => x.Id == targetId).FirstOrDefaultAsync()).Name);
+            Assert.Equal(item.IsComplete, (await context.TodoItems.Where(x => x.Id == targetId).FirstOrDefaultAsync()).IsComplete);
         }
 
         [Fact(DisplayName = "DELETE api/todo/{id} 正常系")]

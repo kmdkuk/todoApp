@@ -61,17 +61,17 @@ namespace todoApp.Controllers
 
         // PUT: api/Todo/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(long id, TodoItem todoItem)
+        public async Task<ActionResult<TodoItem>> PutTodoItem(long id, TodoItem todoItem)
         {
             if (id != todoItem.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(todoItem).State = EntityState.Modified;
+            _context.TodoItems.Update(todoItem);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return _context.TodoItems.Where(x => x.Id == id).FirstOrDefault();
         }
 
         // DELETE: api/Todo/5
